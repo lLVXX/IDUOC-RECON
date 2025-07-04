@@ -38,8 +38,8 @@ Sigue estos pasos para desplegar la plataforma localmente en menos de 5 minutos:
 
 Clona el repositorio y sitúate en la carpeta:
 
-git clone https://github.com/tu-usuario/tu-repo.git
-cd tu-repo
+git clone https://github.com/lLVXX/IDUOC-RECON.git
+cd IDUOC-RECON
 
 Copia el archivo de variables de entorno y personalízalo:
 
