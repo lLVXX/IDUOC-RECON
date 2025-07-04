@@ -1,118 +1,76 @@
-Proyecto de Reconocimiento Facial Académico
+Reconocimiento Facial Académico
 
-Este repositorio contiene una solución completa de asistencia académica basada en reconocimiento facial.
+Reconocimiento Facial Académico es una plataforma basada en Django y FastAPI que ofrece un flujo completo de asistencia en tiempo real para entornos educativos. Integra procesamiento de video por WebSocket, generación y comparación de embeddings con ArcFace (ONNX), y un sistema de almacenamiento vectorial en PostgreSQL + pgvector, todo orquestado mediante Docker y Celery.
 
-📖 Descripción
+Introducción
 
-Un sistema que permite a los profesores iniciar clases manualmente, capturar rostros en tiempo real, compararlos contra una base de datos de embeddings, y registrar la asistencia. Incorpora una política FIFO para el almacenamiento de imágenes dinámicas (máximo 3 por estudiante).
+Este repositorio agrupa dos servicios contenedorizados:
 
-🏗 Arquitectura
+Aplicación Django que maneja autenticación multifacética, roles (admin_global, admin_zona, profesor, estudiante) y vistas de gestión.
 
-Django: Gestión central de usuarios (admin_global, admin_zona, profesor, estudiante), clases y CRUD unificado.
+Microservicio FastAPI que expone endpoints para generar embeddings faciales, comparar vectores y servir streaming WebSocket.
 
-FastAPI (ArcFace Service): Generación y comparación de embeddings usando ONNX.
+Ambos interactúan con una base de datos PostgreSQL que utiliza pgvector para almacenar vectores de alta dimensión. Las tareas intensivas (generación de embeddings, política FIFO de imágenes dinámicas) se procesan asíncronamente mediante Celery y RabbitMQ.
 
-PostgreSQL + pgvector: Almacena vectores de embeddings y permite consultas de similitud.
+Tecnologías
 
-Celery + RabbitMQ: Orquestación asíncrona de tareas (generación/recarga de embeddings, guardado de imágenes).
+La plataforma emplea las siguientes tecnologías clave:
 
-Docker & Docker Compose: Contenerización de todos los servicios.
+Python 3.10 como lenguaje principal.
 
-Diagrama ASCII
+Django 5.2.3 para la capa MVC y la interfaz administrativa.
 
-+----------------+      +-------------+      +----------+
-|    Browser     | <--> | Django App  | <--> | PostgreSQL (pgvector)
-+----------------+      +-------------+      +----------+
-        |                    |                   /
-        | WebSocket          | Celery            /
-        v                    v                 /
-   +------------+      +-----------+         /   
-   |  FastAPI   | <--> | RabbitMQ  |<--------    
-   |  arcface   |      |  Broker   |               
-   +------------+      +-----------+               
+FastAPI 0.95 para endpoints REST y WebSocket de reconocimiento.
 
-🛠 Instalación detallada
+InsightFace (ONNX buffalo_l) para extracción de embeddings faciales.
 
-Clonar el repositorio
+ONNX Runtime para ejecución del modelo.
+
+PostgreSQL ≥14 + pgvector para almacenamiento y consulta de vectores.
+
+Celery 5.5.3 y RabbitMQ 3.9 para procesar tareas en background (generación y recarga de embeddings, limpieza FIFO).
+
+Docker CE 24.x y Docker Compose 3.9 para contenerizar y orquestar servicios.
+
+Quick Start con Docker
+
+Sigue estos pasos para desplegar la plataforma localmente en menos de 5 minutos:
+
+Clona el repositorio y sitúate en la carpeta:
 
 git clone https://github.com/tu-usuario/tu-repo.git
 cd tu-repo
 
-Variables de entorno
+Copia el archivo de variables de entorno y personalízalo:
 
 cp .env.example .env
+# Edita .env según tu configuración de base de datos y servicios
 
-Edita .env con tus credenciales:
+Construye y levanta todos los contenedores:
 
-PG_DB=SCOUT_DB
-PG_USER=postgres
-PG_PASSWORD=12345678
-PG_HOST=db
-PG_PORT=5432
+docker compose build --pull --no-cache
+docker compose up -d
 
-ARC_FACE_URL=http://arcface:8001
-ARC_FACE_WS=ws://arcface:8001/stream/
+*Nota: Durante la construcción se instala automáticamente requirements.txt.
 
-DJANGO_SECRET_KEY=tu_clave_secreta
-DEBUG=True
-
-Levantamiento con Docker
-
-docker compose up -d --build
-
-Migraciones y superusuario
+Ejecuta migraciones y crea el superusuario:
 
 docker compose exec django python manage.py migrate
 docker compose exec django python manage.py createsuperuser
 
-Verificación
+Abre tu navegador y verifica que todo funcione:
 
-Django: http://localhost:8000
+Aplicación web: http://localhost:8000
 
-FastAPI: http://localhost:8001/docs
+Documentación FastAPI: http://localhost:8001/docs
 
-RabbitMQ UI: http://localhost:15672 (guest/guest)
+Panel RabbitMQ: http://localhost:15672 (guest/guest)
 
-📚 SDKs y Dependencias
+Contribución
 
-Python 3.10
+Las contribuciones son bienvenidas. Para proponer cambios, crea un fork, abre una rama con tu feature o fix, y envía un pull request contra main.
 
-Django 5.2.3
+Licencia
 
-FastAPI 0.95
+Este proyecto está licenciado bajo MIT. Para más detalles, consulta el archivo LICENSE.
 
-InsightFace ONNX (buffalo_l)
-
-pgvector
-
-Celery 5.5.3
-
-RabbitMQ 3.9
-
-Docker 24.x
-
-Docker Compose 3.9
-
-🔧 FIFO de Imágenes Dinámicas
-
-Al hacer match:
-
-Se guarda la imagen en PostgreSQL.
-
-Si hay más de 3, se elimina la más antigua.
-
-Permite análisis completo post-clase.
-
-📄 Contribuciones
-
-Para contribuir:
-
-Fork del repositorio
-
-Crear una rama feature/x
-
-Commit y PR sobre main
-
-📝 Licencia
-
-MIT © Tu Nombre
