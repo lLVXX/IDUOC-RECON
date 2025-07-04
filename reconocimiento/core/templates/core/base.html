@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RECON</title>
+    <link rel="shortcut icon" href="{% static 'core/images/favicon.png' %}" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'core/css/style.css' %}" rel="stylesheet">
+    {% block stylesheet %}{% endblock %}
+</head>
+
+<body class="flex-background">
+<div class="conten-wrapper">
+
+  {% block navbar %}
+  {% if user.is_authenticated %}
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">RECON</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto">
+
+          <!-- Inicio según tipo -->
+          <li class="nav-item">
+            {% if user.user_type == 'admin_global' %}
+              <a class="nav-link" href="{% url 'dashboard_admin_global' %}">
+                <i class="bi bi-house-fill"></i> Inicio
+              </a>
+            {% elif user.user_type == 'admin_zona' %}
+              <a class="nav-link" href="{% url 'dashboard_admin_zona' %}">
+                <i class="bi bi-house-fill"></i> Inicio
+              </a>
+            {% elif user.user_type == 'profesor' %}
+              <a class="nav-link" href="{% url 'clases:dashboard_profesor' %}">
+                <i class="bi bi-house-fill"></i> Mis Clases
+              </a>
+            {% endif %}
+          </li>
+
+          <!-- Menú Profesor -->
+          {% if user.user_type == 'profesor' %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'clases:horario_profesor' %}">
+                <i class="bi bi-calendar-week"></i> Mi Horario
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'clases:listado_instancias' %}">
+                <i class="bi bi-clock-history"></i> Historial de Clases
+              </a>
+            </li>
+          {% endif %}
+
+          <!-- Menú Admin Zona -->
+          {% if user.user_type == 'admin_zona' %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="gestionarDropdown" role="button" data-bs-toggle="dropdown">
+                <i class="bi bi-tools"></i> Gestionar
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="gestionarDropdown">
+                <li><a class="dropdown-item" href="{% url 'sedes:gestionar_carreras' %}"><i class="bi bi-diagram-3"></i> Carreras</a></li>
+                <li><a class="dropdown-item" href="{% url 'sedes:gestionar_asignaturas' %}"><i class="bi bi-book"></i> Asignaturas</a></li>
+                <li><a class="dropdown-item" href="{% url 'sedes:gestionar_secciones' %}"><i class="bi bi-list-ol"></i> Secciones</a></li>
+                <li><a class="dropdown-item" href="{% url 'sedes:gestionar_profesores' %}"><i class="bi bi-person"></i> Profesores</a></li>
+                <li><a class="dropdown-item" href="{% url 'sedes:gestionar_estudiantes' %}"><i class="bi bi-people"></i> Estudiantes</a></li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'clases:gestionar_bloques_horarios' %}">
+                    <i class="bi bi-clock"></i> Bloques Horarios
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'clases:gestionar_aulas' %}">
+                    <i class="bi bi-door-open"></i> Aulas
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'clases:gestionar_clases' %}">
+                    <i class="bi bi-easel"></i> Clases
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'gestionar_calendario' %}">
+                <i class="bi bi-calendar-event"></i> Calendario Académico
+              </a>
+            </li>
+          {% endif %}
+
+          <!-- Menú Admin Global -->
+          {% if user.user_type == 'admin_global' %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'sedes:gestionar_sedes' %}">
+                <i class="bi bi-building"></i> Crear Sede
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'gestionar_admin_zona' %}">
+                <i class="bi bi-person-plus"></i> Crear Admin Zona
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'gestionar_calendario' %}">
+                <i class="bi bi-calendar-event"></i> Calendario Académico
+              </a>
+            </li>
+          {% endif %}
+
+        </ul>
+
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item me-2">
+            <span class="navbar-text text-white">
+              {{ user.username }} ({{ user.get_user_type_display }})
+            </span>
+          </li>
+          <li class="nav-item">
+            <form action="{% url 'logout' %}" method="post" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="nav-link btn btn-link" style="color:white; text-decoration:none;">
+                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+              </button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+  {% endblock navbar %}
+
+  {% block content %}{% endblock %}
+
+</div>
+
+{# Modal de confirmación global #}
+  {% include "include/confirm_delete_modal.html" %}
+
+{# Script que rellena el modal #}
+<script src="{% static 'js/confirm-delete.js' %}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const modalEl = document.getElementById('confirmDeleteModal');
+      if (!modalEl) return;
+      const msgEl     = modalEl.querySelector('#confirmDeleteMessage');
+      const inputEl   = modalEl.querySelector('#confirmDeleteInput');
+      const formEl    = modalEl.querySelector('form');
+      // todos los enlaces con atributos data-delete-*
+      document.querySelectorAll('[data-delete-url]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.preventDefault();
+          const url = btn.getAttribute('data-delete-url');
+          const id  = btn.getAttribute('data-delete-id');
+          const msg = btn.getAttribute('data-delete-msg');
+          formEl.action = url;
+          inputEl.value = id;
+          msgEl.textContent = msg;
+          new bootstrap.Modal(modalEl).show();
+        });
+      });
+    });
+    </script>
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

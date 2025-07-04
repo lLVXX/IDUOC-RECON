@@ -1,0 +1,69 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Gestionar Secciones</h2>
+
+  {# Mensajes de éxito/error #}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+
+  {# Formulario crear/editar #}
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">
+          {% if editar_id %}Actualizar{% else %}Crear{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {# Tabla de secciones #}
+  {% if secciones %}
+    <div class="table-responsive">
+      <table class="table table-striped mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Nombre</th>
+            <th>Asignatura</th>
+            <th>Carrera</th>
+            <th>Sede</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sec in secciones %}
+            <tr>
+              <td>{{ sec.nombre }}</td>
+              <td>{{ sec.asignatura.nombre }}</td>
+              <td>{{ sec.asignatura.carrera.nombre }}</td>
+              <td>{{ sec.asignatura.carrera.sede.nombre }}</td>
+              <td class="text-center">
+                {# Editar -> simplemente GET ?editar=ID #}
+                <a href="?editar={{ sec.id }}" class="btn btn-sm btn-warning me-1">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                {# Borrar -> disparar modal universal #}
+                <button
+                  type="button"
+                  class="btn btn-sm btn-danger btn-delete"
+                  data-delete-url="{% url 'sedes:gestionar_secciones' %}"
+                  data-delete-id="{{ sec.id }}"
+                  data-delete-msg="¿Eliminar la sección ‘{{ sec.nombre }}’?"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>No hay secciones registradas.</p>
+  {% endif %}
+</div>
+{% endblock %}

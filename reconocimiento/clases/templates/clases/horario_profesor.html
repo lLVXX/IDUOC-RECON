@@ -1,0 +1,93 @@
+{% extends "core/base.html" %}
+{% load dict_extras %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Mi Horario Semanal</h2>
+
+  <form method="get" class="mb-4 d-flex align-items-center">
+    <label class="me-2"><strong>Semana:</strong></label>
+    <select name="semana" class="form-select w-auto" onchange="this.form.submit()">
+      {% for s in semanas %}
+        <option value="{{ s.id }}" {% if s == semana_sel %}selected{% endif %}>
+          Semana {{ s.numero }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-hover text-center align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Bloque / Día</th>
+          {% for dn in dias_nombres %}<th>{{ dn }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in bloques %}
+        <tr>
+          <th class="bg-light text-start ps-3" style="white-space:nowrap;">
+            <div class="fw-semibold">{{ b.nombre }}</div>
+            <small class="text-muted">
+              {{ b.hora_inicio|time:"H:i" }}–{{ b.hora_fin|time:"H:i" }}
+            </small>
+          </th>
+          {% for dia in dias %}
+          <td>
+            {% with inst=matriz|dict_get:dia|dict_get:b.id %}
+              {% if inst %}
+                <div class="position-relative">
+                  {# Card base igual para todas #}
+                  <div class="card shadow-sm text-white {{ inst.finalizada|yesno:'bg-secondary,bg-info' }}"
+                       style="border-radius:.75rem;">
+                    <div class="card-body p-2">
+                      {% if inst.finalizada %}
+                        <span class="badge bg-dark position-absolute top-0 end-0 m-1">
+                          Finalizada
+                        </span>
+                      {% endif %}
+                      <h6 class="card-title mb-1">
+                        <i class="bi bi-book-half me-1"></i>
+                        {{ inst.version.plantilla.seccion.asignatura.nombre }}
+                      </h6>
+                      <p class="card-text small mb-2">
+                        Sección <strong>{{ inst.version.plantilla.seccion.nombre }}</strong><br>
+                        Aula <strong>{{ inst.version.plantilla.aula.numero_sala }}</strong>
+                      </p>
+                      <span class="badge bg-dark small">
+                        {{ counts_map|get_item:inst.version.plantilla.seccion.id|default:0 }} Est.
+                      </span>
+                    </div>
+                  </div>
+                  {# Overlay de botones si finalizada #}
+                  {% if inst.finalizada %}
+                  <div class="mt-2 d-flex justify-content-center gap-1">
+                    <a href="{% url 'clases:reporte_instancia' inst.id %}"
+                       class="btn btn-sm btn-light">
+                      Ver Reporte
+                    </a>
+                    <a href="{% url 'clases:detalle_instancia' inst.id %}?modo=edicion"
+                       class="btn btn-sm btn-warning">
+                      Editar Asist.
+                    </a>
+                  </div>
+                  {% else %}
+                  {# Si no finalizada, el card entero es link #}
+                  <a href="{% url 'clases:detalle_instancia' inst.id %}"
+                     class="stretched-link"></a>
+                  {% endif %}
+                </div>
+              {% else %}
+                &mdash;
+              {% endif %}
+            {% endwith %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

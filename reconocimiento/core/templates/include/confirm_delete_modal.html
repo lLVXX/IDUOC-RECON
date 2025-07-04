@@ -1,0 +1,22 @@
+<!-- confirm_delete_modal.html -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="eliminar_id" id="confirmDeleteInput">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar Eliminación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="confirmDeleteMessage">
+          <!-- Se rellenará dinámicamente -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

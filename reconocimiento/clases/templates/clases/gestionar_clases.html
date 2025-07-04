@@ -1,0 +1,290 @@
+{% extends "core/base.html" %}
+{% load dict_extras %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4 text-dark">Gestión de Horario Semanal</h2>
+
+  {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+  {% endfor %}
+
+  {# 1) Selección de Profesor #}
+  <form method="get" class="mb-4 d-flex align-items-center">
+    <label class="me-2 text-secondary"><strong>Profesor:</strong></label>
+    <select name="profesor"
+            class="form-select w-auto bg-dark text-white"
+            onchange="this.form.submit()">
+      <option value="">-- Selecciona --</option>
+      {% for p in profesores %}
+        <option value="{{ p.id }}"
+          {% if selected_profesor and p.id == selected_profesor.id %}selected{% endif %}>
+          {{ p.get_full_name }}{% if p.carrera %} – {{ p.carrera.nombre }}{% endif %}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+
+  {% if selected_profesor %}
+    <p class="text-muted"><strong>Carrera:</strong> {{ selected_profesor.carrera.nombre }}</p>
+
+    {# 2) Formulario Crear Plantilla #}
+    <div class="card mb-4 bg-secondary text-white">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-journal-plus"></i> Crear Nueva Plantilla</h5>
+        <form method="post"
+              action="?profesor={{ selected_profesor.id }}"
+              class="row g-3 align-items-end">
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+          <div class="col-md-3">
+            <label class="form-label">Asignatura</label>
+            {{ form.asignatura|add_class:"form-select bg-dark text-white border-light" }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Sección</label>
+            {{ form.seccion|add_class:"form-select bg-dark text-white border-light" }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Día Semana</label>
+            {{ form.dia_semana|add_class:"form-select bg-dark text-white border-light" }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Bloque</label>
+            {{ form.bloque_horario|add_class:"form-select bg-dark text-white border-light" }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Aula</label>
+            {{ form.aula|add_class:"form-select bg-dark text-white border-light" }}
+          </div>
+          <div class="col-12 text-end">
+            <button name="agregar" class="btn btn-light text-dark">
+              <i class="bi bi-plus-circle me-1"></i> Agregar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {# 3) Formulario Publicar Semestre — siempre visible #}
+    <form method="post"
+          action="?profesor={{ selected_profesor.id }}"
+          class="mb-4">
+      {% csrf_token %}
+      <button name="publicar" class="btn btn-warning">
+        <i class="bi bi-upload me-1"></i> Publicar semestre
+      </button>
+    </form>
+
+    {# 4) Selector de Semana — siempre visible si hay semanas definidas #}
+    {% if semanas %}
+      <form method="get" class="mb-3 d-flex align-items-center">
+        <input type="hidden" name="profesor" value="{{ selected_profesor.id }}">
+        <label class="me-2 text-secondary"><strong>Semana:</strong></label>
+        <select name="semana"
+                class="form-select w-auto bg-dark text-white"
+                onchange="this.form.submit()">
+          {% for s in semanas %}
+            <option value="{{ s.id }}" {% if s == sem_act %}selected{% endif %}>
+              Semana {{ s.numero }} ({{ s.fecha_inicio|date:"d/m/Y" }})
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+    {% endif %}
+
+    {# 5) Tablero Semanal — sólo si ya hay algo publicado #}
+    {% if any_publicada %}
+      <div class="table-responsive">
+        <table class="table table-hover text-center align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Bloque / Día</th>
+              {% for dn in dias_nombres %}<th>{{ dn }}</th>{% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in bloques %}
+              <tr>
+                <th class="bg-light text-start ps-3" style="white-space:nowrap;">
+                  <div class="fw-semibold">{{ b.nombre }}</div>
+                  <small class="text-muted">
+                    {{ b.hora_inicio|time:"H:i" }}–{{ b.hora_fin|time:"H:i" }}
+                  </small>
+                </th>
+                {% for dia in dias %}
+                  <td>
+                    {% with cell=matriz|dict_get:dia|dict_get:b.id %}
+                      {% if cell %}
+                        <div class="position-relative d-inline-block" style="width:12rem;">
+                          <div class="card bg-info shadow text-white" style="border-radius:.75rem;">
+                            <div class="card-body p-2">
+                              <h6 class="card-title mb-1">
+                                <i class="bi bi-book-half me-1"></i>
+                                {{ cell.version.plantilla.seccion.asignatura.nombre }}
+                              </h6>
+                              <p class="card-text small mb-2">
+                                Sección <strong>{{ cell.version.plantilla.seccion.nombre }}</strong><br>
+                                Aula <strong>{{ cell.version.plantilla.aula.numero_sala }}</strong>
+                              </p>
+                              <span class="badge bg-dark text-white position-absolute bottom-0 end-0 m-1">
+                                {{ counts_map|get_item:cell.version.plantilla.seccion.id|default:0 }} Est.
+                              </span>
+
+                              {# Botones: Eliminar y Editar #}
+                              <div class="position-absolute top-0 start-0 m-1 d-flex gap-1">
+                                <button
+                                  class="btn btn-sm btn-light p-1"
+                                  style="font-size:0.75rem;"
+                                  onclick="openModal(this)"
+                                  data-action="eliminar_inst"
+                                  data-id="{{ cell.id }}">
+                                  <i class="bi bi-trash-fill text-danger"></i>
+                                </button>
+                                <button
+                                  class="btn btn-sm btn-light p-1"
+                                  style="font-size:0.75rem;"
+                                  onclick="openModal(this)"
+                                  data-action="editar_plantilla"
+                                  data-id="{{ cell.version.plantilla.id }}"
+                                  data-asignatura="{{ cell.version.plantilla.seccion.asignatura.id }}"
+                                  data-seccion="{{ cell.version.plantilla.seccion.id }}"
+                                  data-aula="{{ cell.version.plantilla.aula.id }}">
+                                  <i class="bi bi-pencil-fill text-warning"></i>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      {% else %}
+                        &mdash;
+                      {% endif %}
+                    {% endwith %}
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {# Modal Editar/Eliminar #}
+  <div class="modal fade" id="alcanceModal" tabindex="-1">
+    <div class="modal-dialog">
+      <form id="alcanceForm"
+            action="?profesor={{ selected_profesor.id }}{% if sem_act %}&semana={{ sem_act.id }}{% endif %}"
+            method="post"
+            class="modal-content">
+        {% csrf_token %}
+        <input type="hidden" name="action" id="modal_action">
+        <input type="hidden" name="target_id" id="modal_target">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title"><i class="bi bi-gear-fill me-1"></i> Editar / Eliminar</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="editFields" class="mb-3 d-none">
+            <div class="mb-2">
+              <label class="form-label">Asignatura</label>
+              <select id="modal_asignatura" name="asignatura" class="form-select"></select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Sección</label>
+              <select id="modal_seccion" name="seccion" class="form-select"></select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Aula</label>
+              <select id="modal_aula" name="aula" class="form-select">
+                {% for a in form.fields.aula.queryset %}
+                  <option value="{{ a.id }}">{{ a }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <p class="mb-2">Aplicar a:</p>
+          <div class="form-check mb-1">
+            <input class="form-check-input" type="radio" name="scope" id="onlyWeek" value="week" checked>
+            <label class="form-check-label" for="onlyWeek">Sólo esta semana</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="scope" id="fromWeek" value="from">
+            <label class="form-check-label" for="fromWeek">A partir de esta semana</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-info text-white">Confirmar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Cascada para el form de Creación
+      const A = document.getElementById('id_asignatura'),
+            S = document.getElementById('id_seccion');
+      if (A && S) {
+        A.onchange = () => {
+          S.innerHTML = '<option>Cargando…</option>';
+          fetch("{% url 'clases:get_secciones_ajax' %}?asignatura_id=" + A.value)
+            .then(r => r.json())
+            .then(data => {
+              S.innerHTML = '<option value=\"\">---------</option>';
+              data.forEach(i => {
+                const o = document.createElement('option');
+                o.value = i.id; o.textContent = i.nombre;
+                S.appendChild(o);
+              });
+            });
+        };
+      }
+
+      // Modal editar/eliminar
+      const modal = new bootstrap.Modal(document.getElementById('alcanceModal'));
+      const editF = document.getElementById('editFields');
+      window.openModal = btn => {
+        const act = btn.dataset.action, id = btn.dataset.id;
+        document.getElementById('modal_action').value = act;
+        document.getElementById('modal_target').value = id;
+
+        if (act === 'editar_plantilla') {
+          editF.classList.remove('d-none');
+          // cargar asignaturas
+          fetch("{% url 'clases:get_asignaturas_ajax' %}")
+            .then(r => r.json())
+            .then(data => {
+              const selA = document.getElementById('modal_asignatura');
+              selA.innerHTML = '<option value=\"\">---------</option>';
+              data.forEach(i => {
+                const o = new Option(i.nombre, i.id);
+                if (i.id == btn.dataset.asignatura) o.selected = true;
+                selA.add(o);
+              });
+            });
+          // luego secciones
+          setTimeout(() => {
+            fetch("{% url 'clases:get_secciones_ajax' %}?asignatura_id=" + btn.dataset.asignatura)
+              .then(r => r.json())
+              .then(data => {
+                const selS = document.getElementById('modal_seccion');
+                selS.innerHTML = '<option value=\"\">---------</option>';
+                data.forEach(i => {
+                  const o = new Option(i.nombre, i.id);
+                  if (i.id == btn.dataset.seccion) o.selected = true;
+                  selS.add(o);
+                });
+              });
+          }, 100);
+          document.getElementById('modal_aula').value = btn.dataset.aula;
+        } else {
+          editF.classList.add('d-none');
+        }
+        modal.show();
+      };
+    });
+  </script>
+</div>
+{% endblock %}

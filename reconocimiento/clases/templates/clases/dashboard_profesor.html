@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-fluid py-5" style="background: url('/static/images/bg-dark.jpg') center/cover no-repeat;">
+  <div class="container py-5">
+
+    <!-- Métricas encapsuladas -->
+    <div class="card bg-white mb-5 shadow-lg">
+      <div class="card-header bg-primary text-white text-center">
+        <h2 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Métricas Generales</h2>
+      </div>
+      <div class="card-body">
+        <div class="row gy-4 text-center">
+          <div class="col-md-3"><div class="card bg-primary text-white h-100"><div class="card-body"><h5>Total Clases</h5><p class="display-6">{{ total_clases }}</p></div></div></div>
+          <div class="col-md-3"><div class="card bg-success text-white h-100"><div class="card-body"><h5>Finalizadas</h5><p class="display-6">{{ total_finalizadas }}</p></div></div></div>
+          <div class="col-md-3"><div class="card bg-warning text-dark h-100"><div class="card-body"><h5>Pendientes</h5><p class="display-6">{{ total_pendientes }}</p></div></div></div>
+          <div class="col-md-3"><div class="card bg-info text-white h-100"><div class="card-body"><h5>% Asist. Prom</h5><p class="display-6">{{ asist_prom }}%</p></div></div></div>
+        </div>
+        <div class="row gy-4 text-center mt-4">
+          <div class="col-md-4"><div class="card bg-success text-white h-100"><div class="card-body"><h6>Automáticas</h6><p class="fs-3">{{ auto_total }}</p></div></div></div>
+          <div class="col-md-4"><div class="card bg-secondary text-white h-100"><div class="card-body"><h6>Manuales</h6><p class="fs-3">{{ man_total }}</p></div></div></div>
+          <div class="col-md-4"><div class="card bg-danger text-white h-100"><div class="card-body"><h6>Ausentes</h6><p class="fs-3">{{ absent_total }}</p></div></div></div>
+        </div>
+      
+
+        <div class="text-end mt-3">
+  <a href="{% url 'clases:dashboard_profesor' %}?format=pdf"
+     class="btn btn-outline-dark">
+    <i class="bi bi-file-earmark-pdf-fill me-1"></i>
+    Descargar PDF
+  </a>
+</div>
+
+
+
+
+
+      </div>
+
+
+
+      
+    </div>
+
+    <!-- Historial encapsulado -->
+    <div class="card bg-white shadow-lg">
+      <div class="card-header bg-secondary text-white text-center">
+        <h2 class="mb-0"><i class="bi bi-clock-history me-2"></i>Historial Clases Finalizadas</h2>
+      </div>
+      <div class="card-body p-0" style="max-height:400px; overflow-y:auto;">
+        <table class="table table-striped mb-0">
+          <thead class="table-dark position-sticky top-0">
+            <tr>
+              <th>Fecha</th><th>Asignatura</th><th>Sección</th>
+              <th>Total</th><th>Autom.</th><th>Manual</th><th>% Asist.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in historial %}
+            <tr>
+              <td>{{ c.fecha|date:"d M Y" }}</td>
+              <td>{{ c.asignatura }}</td>
+              <td>{{ c.seccion }}</td>
+              <td>{{ c.total }}</td>
+              <td>{{ c.auto }}</td>
+              <td>{{ c.manual }}</td>
+              <td>{{ c.pct }}&#37;</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center py-3">No hay clases finalizadas.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

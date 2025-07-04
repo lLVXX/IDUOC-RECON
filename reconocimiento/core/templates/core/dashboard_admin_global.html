@@ -1,0 +1,140 @@
+{% extends "core/base.html" %}
+{% block title %}Dashboard Administrador Global{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+  <!-- Filtrar por sede -->
+  <ul class="nav nav-pills mb-4">
+    <li class="nav-item">
+      <a class="nav-link {% if not sede_sel %}active{% endif %}" href="?sede=all">Todas las sedes</a>
+    </li>
+    {% for s in sedes %}
+    <li class="nav-item">
+      <a class="nav-link {% if sede_sel and s.id == sede_sel.id %}active{% endif %}"
+         href="?sede={{ s.id }}">{{ s.nombre }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+      Dashboard Global
+      <small class="text-muted">— 
+        {% if sede_sel %}
+          {{ sede_sel.nombre }}
+        {% else %}
+          Todas las sedes
+        {% endif %}
+      </small>
+    </h1>
+    <a href="?{% if sede_sel %}sede={{ sede_sel.id }}&{% endif %}format=pdf"
+       class="btn btn-outline-secondary">
+      <i class="bi bi-file-earmark-pdf-fill me-1"></i>Descargar PDF
+    </a>
+  </div>
+
+  {% for data in sedes_data %}
+  <div class="card mb-5 shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">📍 {{ data.sede.nombre }}</h4>
+    </div>
+    <div class="card-body">
+
+      <!-- Totales básicos -->
+      <div class="row g-4 mb-4 text-center">
+        <div class="col-md-3">
+          <div class="card bg-success text-white h-100">
+            <div class="card-body">
+              <h6>Profesores</h6>
+              <p class="display-5">{{ data.total_profesores }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-info text-white h-100">
+            <div class="card-body">
+              <h6>Estudiantes</h6>
+              <p class="display-5">{{ data.total_estudiantes }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-warning text-dark h-100">
+            <div class="card-body">
+              <h6>Clases Finalizadas</h6>
+              <p class="display-5">{{ data.total_clases }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-secondary text-white h-100">
+            <div class="card-body">
+              <h6>% Asistencia</h6>
+              <p class="display-5">{{ data.pct_global }}%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Por Carrera -->
+      <h5 class="mb-3">📊 Por Carrera</h5>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        {% for c in data.carreras_stats %}
+        <div class="col">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <h6>{{ c.nombre }}</h6>
+              <small class="text-muted">{{ c.sede }}</small>
+              <p class="mb-1"><strong>Clases:</strong> {{ c.clases }}</p>
+              <p class="mb-2"><strong>%:</strong> {{ c.porcentaje }}%</p>
+              <div class="progress" style="height:.75rem;">
+                <div class="progress-bar" style="width:{{ c.porcentaje }}%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Por Asignatura -->
+      <h5 class="mb-3">📚 Por Asignatura</h5>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        {% for a in data.asignaturas_stats %}
+        <div class="col">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <h6>{{ a.nombre }}</h6>
+              <small class="text-muted">{{ a.sede }}</small>
+              <p class="mb-1"><strong>Clases:</strong> {{ a.clases }}</p>
+              <p class="mb-2"><strong>%:</strong> {{ a.porcentaje }}%</p>
+              <div class="progress" style="height:.75rem;">
+                <div class="progress-bar bg-success" style="width:{{ a.porcentaje }}%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Estudiantes por Carrera -->
+      <h5 class="mb-3">👥 Estudiantes por Carrera</h5>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for e in data.estudiantes_stats %}
+        <div class="col">
+          <div class="card h-100">
+            <div class="card-body text-center">
+              <h6>{{ e.nombre }}</h6>
+              <p class="display-5">{{ e.alumnos }}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

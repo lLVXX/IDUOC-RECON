@@ -1,0 +1,103 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Gestión de Carreras</h2>
+
+  {# Mensajes #}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+
+  <div class="row">
+    <!-- Formulario crear/editar -->
+    <div class="col-md-5">
+      <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            {% if editar_id %}
+              <input type="hidden" name="editar" value="{{ editar_id }}">
+            {% endif %}
+            <button class="btn btn-success w-100">
+              {% if editar_id %}Actualizar{% else %}Crear{% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de carreras -->
+    <div class="col-md-7">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <table class="table table-bordered mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for carrera in carreras %}
+                <tr>
+                  <td>{{ carrera.nombre }}</td>
+                  <td>{{ carrera.descripcion }}</td>
+                  <td class="text-center">
+                    {# Editar #}
+                    <a href="?editar={{ carrera.id }}"
+                       class="btn btn-sm btn-warning me-1">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    {# Eliminar via modal #}
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-danger btn-delete"
+                      data-delete-url="{% url 'sedes:gestionar_carreras' %}"
+                      data-delete-id="{{ carrera.id }}"
+                      data-delete-msg="¿Seguro que deseas eliminar la carrera ‘{{ carrera.nombre }}’?">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="3" class="text-center">No hay carreras registradas.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Modal global de confirmación #}
+{% include "include/confirm_delete_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const modalEl = document.getElementById('confirmDeleteModal');
+  const modal   = new bootstrap.Modal(modalEl);
+  const form    = modalEl.querySelector('form');
+  const msg     = modalEl.querySelector('#confirmDeleteMessage');
+  const input   = modalEl.querySelector('#confirmDeleteInput');
+
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Rellenamos el form y mostramos mensaje
+      form.action     = btn.dataset.deleteUrl;
+      input.value     = btn.dataset.deleteId;
+      msg.textContent = btn.dataset.deleteMsg;
+      modal.show();
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "core/base.html" %}
+{% block title %}Dashboard Admin Zona{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <div class="card bg-light shadow-sm">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-dark">Panel Admin Zona: {{ request.user.sede.nombre }}</h1>
+        <div class="btn-group">
+          <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+            📥 Exportar
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="?format=pdf">📄 PDF</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Totales generales -->
+      <div class="row g-4 mb-5 text-center">
+        <div class="col-md-4">
+          <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+              <h6>Profesores</h6>
+              <p class="display-5">{{ total_profesores }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card bg-success text-white h-100">
+            <div class="card-body">
+              <h6>Estudiantes</h6>
+              <p class="display-5">{{ total_estudiantes }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card bg-info text-white h-100">
+            <div class="card-body">
+              <h6>Clases Finalizadas</h6>
+              <p class="display-5">{{ total_clases }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen por Carrera -->
+      <div class="card mb-5 shadow-sm">
+        <div class="card-header bg-dark text-white">
+          <h3 class="mb-0">Resumen por Carrera</h3>
+        </div>
+        <div class="card-body">
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for c in carreras_stats %}
+            <div class="col">
+              <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                  <h5 class="card-title">{{ c.nombre }}</h5>
+                  <p class="mb-1"><strong>Clases:</strong> {{ c.clases }}</p>
+                  <p class="mb-2"><strong>% Asistencia:</strong> {{ c.porcentaje }}%</p>
+                  <div class="progress" style="height:0.8rem;">
+                    <div class="progress-bar"
+                         role="progressbar"
+                         style="width:{{ c.porcentaje }}%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-muted">
+              No hay carreras con datos.
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen por Profesor -->
+      <div class="card mb-0 shadow-sm">
+        <div class="card-header bg-dark text-white">
+          <h3 class="mb-0">Resumen por Profesor</h3>
+        </div>
+        <div class="card-body">
+          {% for r in resumen_profs %}
+            <h5>{{ r.nombre }}</h5>
+            <p>
+              Clases dadas: {{ r.clases_dadas }} |
+              Estudiantes: {{ r.estudiantes }} |
+              % Asist.: {{ r.porcentaje }}%
+            </p>
+            <table class="table table-sm mb-4">
+              <thead>
+                <tr>
+                  <th>Asignatura</th>
+                  <th>Sección</th>
+                  <th class="text-end">Manual</th>
+                  <th class="text-end">Autom.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for d in r.detalle %}
+                <tr>
+                  <td>{{ d.asignatura }}</td>
+                  <td>{{ d.seccion }}</td>
+                  <td class="text-end">{{ d.manual }}</td>
+                  <td class="text-end">{{ d.automatico }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted">Sin registros</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% empty %}
+            <p class="text-center text-muted">No hay datos de profesores.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

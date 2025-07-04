@@ -1,0 +1,70 @@
+{% extends "core/base.html" %}
+{% block title %}Reporte de Asistencia{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+  <h2 class="mb-3">Reporte de Asistencia</h2>
+
+  <p>
+    <strong>Clase:</strong>
+    {{ instancia.version.plantilla.seccion.asignatura.nombre }}
+    – {{ instancia.version.plantilla.seccion.nombre }}
+  </p>
+  <p>
+    <strong>Fecha:</strong> {{ instancia.fecha|date:"d/m/Y" }}
+  </p>
+
+  <div class="row mb-4 g-4">
+    <div class="col-auto">
+      <div class="card bg-success text-white p-3 shadow-sm">
+        <h5 class="mb-1">Presentes</h5>
+        <p class="display-6">{{ presentes }}</p>
+      </div>
+    </div>
+    <div class="col-auto">
+      <div class="card bg-danger text-white p-3 shadow-sm">
+        <h5 class="mb-1">Ausentes</h5>
+        <p class="display-6">{{ ausentes }}</p>
+      </div>
+    </div>
+    <div class="col-auto">
+      <div class="card bg-warning text-dark p-3 shadow-sm">
+        <h5 class="mb-1">% Asistencia</h5>
+        <p class="display-6">{{ pct_total }} %</p>
+      </div>
+    </div>
+  </div>
+
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Estudiante</th>
+        <th>RUT</th>
+        <th>Estado</th>
+        <th>Tipo de registro</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in detalle %}
+      <tr>
+        <td>{{ r.nombre }}</td>
+        <td>{{ r.rut }}</td>
+        <td>
+          {% if r.presente %}
+            <span class="badge bg-success">Presente</span>
+          {% else %}
+            <span class="badge bg-secondary">Ausente</span>
+          {% endif %}
+        </td>
+        <td>{{ r.tipo }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{% url 'clases:listado_instancias' %}" class="btn btn-secondary mt-3">
+    Volver a Historial de Clases
+  </a>
+</div>
+{% endblock %}

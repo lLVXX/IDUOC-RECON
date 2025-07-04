@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+insightface
+numpy
+pillow
+psycopg2-binary
+onnxruntime
+python-multipart

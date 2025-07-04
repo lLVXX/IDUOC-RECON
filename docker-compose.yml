@@ -1,0 +1,72 @@
+version: '3.9'
+
+services:
+  db:
+    image: ankane/pgvector
+    container_name: postgres_pgvector
+    restart: always
+    environment:
+      POSTGRES_DB: ${PG_DB}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./setup:/setup
+    ports:
+      - "5432:5432"
+
+  django:
+    build:
+      context: ./reconocimiento
+    container_name: reconocimiento-django
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./reconocimiento:/app
+      - ./reconocimiento/media:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - arcface
+    environment:
+      - ARC_FACE_WS=ws://localhost:8001/stream/  # ✅ IMPORTANTE PARA EL JS
+
+  arcface:
+    build:
+      context: ./arcface_onnx_service
+    container_name: arcface
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    volumes:
+      - ./arcface_onnx_service:/app
+      - ./reconocimiento/media:/app/media
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_broker
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  celery:
+    build:
+      context: ./reconocimiento
+    container_name: reconocimiento-celery
+    command: celery -A reconocimiento worker --loglevel=info --pool=solo
+    volumes:
+      - ./reconocimiento:/app
+    env_file:
+      - .env
+    depends_on:
+      - django
+      - rabbitmq
+
+volumes:
+  postgres_data:

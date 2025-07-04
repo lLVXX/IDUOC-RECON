@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 1rem; color: #333; }
+    h1 { font-size: 24px; text-align: center; margin: .2rem 0; }
+    .totales { margin: 1rem 0; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border: 1px solid #666; padding: .4rem; text-align: left; }
+    th { background: #f0f0f0; }
+    .right { text-align: right; }
+    .footer { position: fixed; bottom: 1rem; width: 100%; text-align: center; font-size: 10px; color: #999; }
+  </style>
+</head>
+<body>
+  <h1>Informe : {{ profesor }}</h1>
+
+  <div class="totales">
+    <strong>Total Clases:</strong> {{ total_clases }} &nbsp;
+    <strong>Finalizadas:</strong> {{ total_finalizadas }} &nbsp;
+    <strong>Pendientes:</strong> {{ total_pendientes }}
+  </div>
+
+  <h2>Asistencia Detallada</h2>
+  <table>
+    <thead>
+      <tr><th>Tipo</th><th class="right">Cantidad</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Automáticas</td><td class="right">{{ auto_total }}</td></tr>
+      <tr><td>Manuales</td><td class="right">{{ man_total }}</td></tr>
+      <tr><td>Ausentes</td><td class="right">{{ absent_total }}</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="margin-top:1rem;">Historial Clases Finalizadas</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th><th>Asignatura</th><th>Sección</th>
+        <th class="right">Total</th><th class="right">Auto</th>
+        <th class="right">Manual</th><th class="right">% Asist.</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in historial %}
+      <tr>
+        <td>{{ c.fecha|date:"Y-m-d" }}</td>
+        <td>{{ c.asignatura }}</td>
+        <td>{{ c.seccion }}</td>
+        <td class="right">{{ c.total }}</td>
+        <td class="right">{{ c.auto }}</td>
+        <td class="right">{{ c.manual }}</td>
+        <td class="right">{{ c.pct }}%</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center; padding:1rem;">
+        No hay clases finalizadas.
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="footer">
+    Generado el {{ now|date:"Y-m-d H:i" }}
+  </div>
+</body>
+</html>

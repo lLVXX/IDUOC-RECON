@@ -1,0 +1,128 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- TÍTULO PRINCIPAL -->
+  <h2 class="mb-4 text-white bg-dark p-2 rounded">Gestionar Asignaturas</h2>
+
+  <!-- FORMULARIO CREAR / EDITAR -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-dark">
+      <h5 class="mb-0 text-white">
+        {{ editar_id|yesno:"Editar Asignatura,Crear Asignatura" }}
+      </h5>
+    </div>
+    <div class="card-body bg-light">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          {% for field in form %}
+            <div class="col-md-6">
+              <label class="form-label" for="{{ field.id_for_label }}">
+                {{ field.label }}{% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+              </label>
+              {{ field }}
+              {% if field.errors %}
+                <div class="text-danger small">
+                  {{ field.errors|join:", " }}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4">
+          <button type="submit" class="btn btn-success">
+            {% if editar_id %}Actualizar{% else %}Crear{% endif %}
+          </button>
+          {% if editar_id %}
+            <a href="{% url 'sedes:gestionar_asignaturas' %}{% if selected_carrera %}?carrera_id={{ selected_carrera }}{% endif %}"
+               class="btn btn-outline-secondary ms-2">
+              Cancelar
+            </a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FILTRO POR CARRERA -->
+  <form method="get" class="row g-2 align-items-center mb-3">
+    <div class="col-auto">
+      <label for="filterCarrera" class="col-form-label">Filtrar Carrera:</label>
+    </div>
+    <div class="col-auto">
+      <select id="filterCarrera" name="carrera_id" class="form-select" onchange="this.form.submit()">
+        <option value="">— Todas —</option>
+        {% for carrera in carreras %}
+          <option value="{{ carrera.id }}" {% if carrera.id == selected_carrera %}selected{% endif %}>
+            {{ carrera.nombre }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+
+  <!-- TABLA DE ASIGNATURAS -->
+  <div class="table-responsive bg-white rounded shadow-sm">
+    <table class="table table-hover mb-0">
+      <thead class="bg-dark">
+        <tr>
+          <th class="text-white">Nombre</th>
+          <th class="text-white">Carrera</th>
+          <th class="text-white">Sede</th>
+          <th class="text-white text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for asignatura in asignaturas %}
+          <tr>
+            <td>{{ asignatura.nombre }}</td>
+            <td>{{ asignatura.carrera.nombre }}</td>
+            <td>{{ asignatura.carrera.sede.nombre }}</td>
+            <td class="text-center">
+              <a href="?editar={{ asignatura.id }}{% if selected_carrera %}&carrera_id={{ selected_carrera }}{% endif %}"
+                 class="btn btn-sm btn-outline-primary me-1">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <button type="button"
+                      class="btn btn-sm btn-outline-danger btn-delete"
+                      data-url="{% url 'sedes:gestionar_asignaturas' %}?eliminar={{ asignatura.id }}{% if selected_carrera %}&carrera_id={{ selected_carrera }}{% endif %}">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-center py-4">
+              No hay asignaturas para la selección actual.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% include "include/confirm_delete_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const deleteModalEl    = document.getElementById('confirmDeleteModal');
+  const deleteModal      = new bootstrap.Modal(deleteModalEl);
+  const form             = document.getElementById('confirmDeleteForm');
+  const messageContainer = document.getElementById('confirmDeleteMessage');
+
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      form.action = btn.dataset.url;
+      messageContainer.textContent = '¿Seguro que quieres eliminar esta asignatura?';
+      deleteModal.show();
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+<!-- templates/personas/listar_estudiantes_con_secciones.html -->
+
+{% extends 'core/base.html' %}
+{% block content %}
+<h2>Estudiantes y Secciones por Asignatura</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Estudiante</th>
+            <th>Asignaturas y Sección</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in data %}
+        <tr>
+            <td>{{ row.estudiante.get_full_name }}<br>RUT: {{ row.estudiante.rut }}</td>
+            <td>
+                <ul>
+                {% for asignatura, seccion in row.asignaturas_secciones %}
+                    <li><strong>{{ asignatura }}</strong>: {{ seccion }}</li>
+                {% endfor %}
+                </ul>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

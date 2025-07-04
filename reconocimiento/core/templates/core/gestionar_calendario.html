@@ -1,0 +1,116 @@
+{% extends 'core/base.html' %}
+{% load dict_extras %}
+{% block content %}
+<div class="container mt-4">
+
+    <!-- CREAR CALENDARIO: solo admin_global -->
+    {% if es_admin_global %}
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <b><i class="bi bi-calendar-plus"></i> Crear Calendario Académico (todas las sedes)</b>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" name="crear" class="btn btn-success">Crear calendario</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- LISTADO -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-info text-white">
+            <b><i class="bi bi-calendar"></i> Calendarios Académicos</b>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped align-middle text-center mb-0">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Sede</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for calendario in calendarios %}
+                    <tr>
+                        <td>{{ calendario.nombre }}</td>
+                        <td>{{ calendario.sede.nombre }}</td>
+                        <td>{{ calendario.fecha_inicio|date:"d/m/Y" }}</td>
+                        <td>{{ calendario.fecha_fin|date:"d/m/Y" }}</td>
+                        <td>
+                            <a href="?edit={{ calendario.id }}" class="btn btn-sm btn-primary">Editar semanas</a>
+                            {% if es_admin_global %}
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" name="eliminar" value="{{ calendario.id }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este calendario?');">Eliminar</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- EDITAR SEMANAS -->
+    {% if calendario_editar %}
+    <div class="card shadow mb-4">
+        <div class="card-header bg-warning text-dark">
+            <b><i class="bi bi-calendar-range"></i> Editar Semanas ({{ calendario_editar.nombre }} - {{ calendario_editar.sede.nombre }})</b>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="calendario_id" value="{{ calendario_editar.id }}">
+                <table class="table table-striped">
+                    <thead class="table-info">
+                        <tr>
+                            <th>#</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for semana in semanas %}
+                        <tr>
+                            <td>
+                                <input type="number" class="form-control" name="semana_{{ semana.pk }}_numero" value="{{ semana.numero }}" min="1" style="width: 70px;">
+                            </td>
+                            <td>
+                                <input type="date" class="form-control" name="semana_{{ semana.pk }}_fecha_inicio" value="{{ semana.fecha_inicio|date:'Y-m-d' }}">
+                            </td>
+                            <td>
+                                <input type="date" class="form-control" name="semana_{{ semana.pk }}_fecha_fin" value="{{ semana.fecha_fin|date:'Y-m-d' }}">
+                            </td>
+                            <td>
+                                <select class="form-select" name="semana_{{ semana.pk }}_tipo">
+                                    <option value="clases" {% if semana.tipo == 'clases' %}selected{% endif %}>Clases</option>
+                                    <option value="receso" {% if semana.tipo == 'receso' %}selected{% endif %}>Receso</option>
+                                    <option value="examenes" {% if semana.tipo == 'examenes' %}selected{% endif %}>Exámenes</option>
+                                    <option value="feriado" {% if semana.tipo == 'feriado' %}selected{% endif %}>Feriado</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="semana_{{ semana.pk }}_descripcion" value="{{ semana.descripcion }}">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" name="guardar_semanas" class="btn btn-success">Guardar Cambios</button>
+                <a href="{% url 'gestionar_calendario' %}" class="btn btn-secondary">Volver</a>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

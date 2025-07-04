@@ -1,0 +1,47 @@
+{% extends "core/base.html" %}
+{% block title %}Instancias Finalizadas{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <h1>Instancias Finalizadas</h1>
+  {% if instancias %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Asignatura / Sección</th>
+          <th>Fecha</th>
+          <th>Reporte</th>
+          <th>Editar Asistencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inst in instancias %}
+        <tr>
+          <td>
+            {{ inst.version.plantilla.seccion.asignatura.nombre }}
+            – {{ inst.version.plantilla.seccion.nombre }}
+          </td>
+          <td>
+  {{ inst.fecha|date:"d/m/Y" }}
+  {{ inst.fecha|time:"H:i" }}
+</td>
+          <td>
+            <a href="{% url 'clases:reporte_instancia' inst.id %}"
+               class="btn btn-sm btn-info">
+              Ver Reporte
+            </a>
+          </td>
+          <td>
+            <a href="{% url 'clases:detalle_instancia' inst.id %}"
+               class="btn btn-sm btn-warning">
+              Editar Asistencia
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No hay instancias finalizadas para ti todavía.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte Dashboard Admin Global</title>
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 13px;}
+      h1, h2, h3 { color: #2b3c4d; }
+      table { width: 100%; border-collapse: collapse; margin-bottom: 20px;}
+      th, td { border: 1px solid #888; padding: 6px; text-align: center; }
+      th { background: #f2f2f2; }
+      .metricas { margin-bottom: 18px; }
+    </style>
+</head>
+<body>
+  <h1>Reporte Consolidado — Dashboard Admin Global</h1>
+  <p><b>Generado por:</b> {{ admin_user.get_full_name }} ({{ admin_user.email }})<br>
+     <b>Fecha:</b> {{ fecha_generacion|date:"d/m/Y H:i" }}<br>
+     {% if sede_actual %}<b>Sede:</b> {{ sede_actual.nombre }}<br>{% endif %}
+     {% if carrera_actual %}<b>Carrera:</b> {{ carrera_actual.nombre }}<br>{% endif %}
+  </p>
+  <h2>Métricas Globales</h2>
+  <div class="metricas">
+    <ul>
+      <li><b>Total Sedes:</b> {{ total_sedes }}</li>
+      <li><b>Total Carreras:</b> {{ total_carreras }}</li>
+      <li><b>Total Asignaturas:</b> {{ total_asignaturas }}</li>
+      <li><b>Total Secciones:</b> {{ total_secciones }}</li>
+      <li><b>Total Profesores:</b> {{ total_profesores }}</li>
+      <li><b>Total Estudiantes:</b> {{ total_estudiantes }}</li>
+      <li><b>Total Clases:</b> {{ total_clases }}</li>
+      <li><b>Clases Finalizadas:</b> {{ total_clases_finalizadas }}</li>
+      <li><b>Total Asistencias:</b> {{ total_asistencias }}</li>
+      <li><b>% Asistencia Global:</b> {{ porcentaje_asistencia|floatformat:1 }}%</li>
+    </ul>
+  </div>
+  <h2>Estadísticas por Sede</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Sede</th>
+        <th>Carreras</th>
+        <th>Asignaturas</th>
+        <th>Secciones</th>
+        <th>Profesores</th>
+        <th>Estudiantes</th>
+        <th>Clases</th>
+        <th>Finalizadas</th>
+        <th>% Asistencia</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sedes_stats %}
+      <tr>
+        <td>{{ s.sede.nombre }}</td>
+        <td>{{ s.carreras }}</td>
+        <td>{{ s.asignaturas }}</td>
+        <td>{{ s.secciones }}</td>
+        <td>{{ s.profesores }}</td>
+        <td>{{ s.estudiantes }}</td>
+        <td>{{ s.clases }}</td>
+        <td>{{ s.clases_finalizadas }}</td>
+        <td>{{ s.porc_asistencia|floatformat:1 }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <h2>Top 10 Asignaturas por Estudiantes</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Asignatura</th>
+        <th>Carrera</th>
+        <th>Sede</th>
+        <th>Estudiantes Inscritos</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in asignaturas_ranking %}
+      <tr>
+        <td>{{ a.nombre }}</td>
+        <td>{{ a.carrera.nombre }}</td>
+        <td>{{ a.carrera.sede.nombre }}</td>
+        <td>{{ a.num_estudiantes }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p style="margin-top: 30px; font-size: 11px; color: #777;">
+    Reporte generado automáticamente. Plataforma {{ fecha_generacion|date:"Y" }}.
+  </p>
+</body>
+</html>

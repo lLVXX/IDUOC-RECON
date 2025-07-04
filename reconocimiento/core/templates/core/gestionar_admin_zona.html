@@ -1,0 +1,138 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Gestión de Administradores de Zona</h2>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row">
+    <!-- Formulario -->
+    <div class="col-md-5">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <form method="POST">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% if editar_id %}
+              <input type="hidden" name="editar_id" value="{{ editar_id }}">
+            {% endif %}
+
+            <div class="mb-3">
+              {{ form.nombre.label_tag }} {{ form.nombre }}
+            </div>
+
+            <div class="mb-3">
+              {{ form.apellido.label_tag }} {{ form.apellido }}
+            </div>
+
+            <div class="mb-3">
+              {{ form.rut.label_tag }} {{ form.rut }}
+            </div>
+
+            <div class="mb-3">
+              {{ form.sede.label_tag }} {{ form.sede }}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+              {% if editar_id %}Actualizar{% else %}Crear{% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="col-md-7">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <table class="table table-bordered table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Nombre</th>
+                <th>Username</th>
+                <th>Correo</th>
+                <th>RUT</th>
+                <th>Sede</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for admin in adminzonas %}
+              <tr>
+                <td>{{ admin.first_name }} {{ admin.last_name }}</td>
+                <td>{{ admin.username }}</td>
+                <td>{{ admin.email }}</td>
+                <td>{{ admin.rut }}</td>
+                <td>{{ admin.workzone.nombre }}</td>
+                <td>
+                  <a href="?editar={{ admin.id }}" class="btn btn-sm btn-warning">Editar</a>
+                  <a href="?eliminar={{ admin.id }}" class="btn btn-sm btn-danger"
+                     onclick="return confirm('¿Eliminar este administrador de zona?')">
+                     Eliminar
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center">No hay administradores de zona registrados.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const rutInput = document.getElementById('rut-input') || document.querySelector("input[name='rut']");
+
+    if (rutInput) {
+      rutInput.addEventListener('input', function () {
+        let raw = rutInput.value.replace(/\D/g, '').toUpperCase();
+
+        if (raw.length > 9) {
+          raw = raw.slice(0, 9);  // Evita exceder el largo máximo del RUT sin formato
+        }
+
+        if (raw.length >= 2) {
+          let cuerpo = raw.slice(0, -1);
+          let dv = raw.slice(-1);
+          let rutFormateado = '';
+          let i = cuerpo.length;
+
+          while (i > 3) {
+            rutFormateado = '.' + cuerpo.slice(i - 3, i) + rutFormateado;
+            i -= 3;
+          }
+
+          rutFormateado = cuerpo.slice(0, i) + rutFormateado + '-' + dv;
+          rutInput.value = rutFormateado;
+        } else {
+          rutInput.value = raw;
+        }
+      });
+
+      rutInput.addEventListener('keydown', function (e) {
+        if (rutInput.value.length >= 12 && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+          e.preventDefault(); // Evita agregar más de 12 caracteres formateados
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

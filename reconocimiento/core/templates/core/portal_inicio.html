@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid portal-container">
+  <div class="row g-0">
+    
+    <!-- Lado izquierdo (fondo decorativo) -->
+    <div class="col-lg-6 d-none d-lg-block portal-empty-left"></div>
+    
+    <!-- Card de login -->
+    <div class="col-lg-6 col-md-12 portal-card-container">
+      <div class="card portal-card">
+        
+        <!-- Encabezado -->
+        <div class="card-header portal-card-header">
+          <h2 class="portal-title">Ingreso al Sistema</h2>
+        </div>
+        
+        <!-- Formulario -->
+        <div class="card-body portal-card-body">
+          <form method="POST" class="portal-form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="mb-4 form-group">
+              {{ form.identificador.label_tag }}
+              {{ form.identificador }}
+              {{ form.identificador.errors }}
+            </div>
+
+            <div class="mb-4 form-group">
+              {{ form.password.label_tag }}
+              {{ form.password }}
+              {{ form.password.errors }}
+            </div>
+
+            <button type="submit" class="btn portal-btn btn-lg">Ingresar</button>
+          </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer portal-card-footer">
+          <div class="text-center">
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert portal-alert">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+            <small class="text-muted">¿Necesitas ayuda? Contacta al administrador</small>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+  </div>
+</div>
+{% endblock %}

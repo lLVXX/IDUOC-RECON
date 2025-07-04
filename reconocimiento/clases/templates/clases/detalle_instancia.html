@@ -1,0 +1,62 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load dict_extras %}
+
+{% block title %}Detalle de Clase{% endblock %}
+
+{% block content %}
+
+<div id="config"
+     data-ws-url="{{ ws_url }}"
+     data-asistencia-url="{{ asistencia_url }}"
+     data-finish-url="{{ finish_url }}"
+     data-captura-url="{{ captura_url }}">
+</div>
+
+<div class="container my-4">
+  <h1>
+    Clase: {{ instancia.version.plantilla.seccion.asignatura.nombre }}
+    
+    – {{ instancia.version.plantilla.seccion.nombre }}
+  </h1>
+  <p><strong>Profesor:</strong> {{ instancia.version.plantilla.profesor.get_full_name }}</p>
+  <p>
+    <strong>Fecha:</strong>
+    {{ instancia.fecha|date:"d/m/Y" }} {{ instancia.fecha|time:"H:i" }}
+  </p>
+
+  <div class="mb-3">
+    <button id="btnTransmitir" class="btn btn-primary">Iniciar transmisión</button>
+    <button id="btnFinalizar"  class="btn btn-danger" disabled>Finalizar clase</button>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <video id="videoFeed" autoplay muted playsinline class="w-100 border"></video>
+      <canvas id="canvasCapture" width="320" height="240" style="display:none;"></canvas>
+    </div>
+    <div class="col-md-6">
+      <h4>Estudiantes Inscritos</h4>
+      <div class="row" id="cardsContainer">
+        {% for est in estudiantes %}
+          <div id="card-{{ est.id }}" class="col-6 mb-3 student-card">
+            <div class="card border-secondary p-2">
+              <div class="card-body text-center">
+                <strong>{{ est.get_full_name }}</strong><br>
+                <small>{{ est.rut }}</small><br>
+                <span class="badge {% if asistencias|get_item:est.id %}bg-success{% else %}bg-secondary{% endif %}">
+                  {% if asistencias|get_item:est.id %}Presente{% else %}No detectado{% endif %}
+                </span>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'clases/js/detalle_instancia.js' %}"></script>
+{% endblock %}

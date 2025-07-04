@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Gestión de Sedes</h2>
+
+
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+
+  <div class="row">
+    <div class="col-md-5">
+      <form method="POST">
+        {% csrf_token %}
+        {% if editando %}
+          <input type="hidden" name="sede_id" value="{{ request.GET.editar }}">
+        {% endif %}
+        <div class="mb-3">{{ form.nombre.label_tag }} {{ form.nombre }}</div>
+        <div class="mb-3">{{ form.direccion.label_tag }} {{ form.direccion }}</div>
+        <div class="mb-3">{{ form.descripcion.label_tag }} {{ form.descripcion }}</div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </form>
+    </div>
+
+    <div class="col-md-7">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Dirección</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sede in sedes %}
+          <tr>
+            <td>{{ sede.nombre }}</td>
+            <td>{{ sede.direccion }}</td>
+            <td>{{ sede.descripcion }}</td>
+            <td>
+              <a href="?editar={{ sede.id }}" class="btn btn-warning btn-sm">Editar</a>
+              <a href="?eliminar={{ sede.id }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta sede?')">Eliminar</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">No hay sedes registradas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

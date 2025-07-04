@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 1rem;
+      color: #333;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .header h1 {
+      font-size: 24px;
+      margin: 0.2rem 0;
+    }
+    .header p {
+      font-size: 14px;
+      margin: 0.1rem 0;
+    }
+    .section {
+      margin-top: 1.5rem;
+    }
+    h2 {
+      font-size: 18px;
+      margin: 0.8rem 0;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 0.2rem;
+    }
+    .totals {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 1rem;
+      font-size: 14px;
+    }
+    .totals .box {
+      width: 30%;
+      text-align: center;
+      padding: 0.5rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #666;
+      padding: 0.4rem;
+    }
+    th {
+      background: #e0e0e0;
+      font-weight: bold;
+    }
+    .right {
+      text-align: right;
+    }
+    .footer {
+      position: fixed;
+      bottom: 1rem;
+      width: 100%;
+      text-align: center;
+      font-size: 10px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Dashboard Zona: {{ zona }}</h1>
+    <p>Administrador: {{ admin_nombre }}</p>
+  </div>
+
+  <div class="totals">
+    <div class="box">
+      <strong>Profesores</strong><br>
+      {{ total_profesores }}
+    </div>
+    <div class="box">
+      <strong>Estudiantes</strong><br>
+      {{ total_estudiantes }}
+    </div>
+    <div class="box">
+      <strong>Clases Finalizadas</strong><br>
+      {{ total_clases }}
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Resumen por Carrera</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Carrera</th>
+          <th class="right">Clases</th>
+          <th class="right">% Asistencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in carreras_stats %}
+        <tr>
+          <td>{{ c.nombre }}</td>
+          <td class="right">{{ c.clases }}</td>
+          <td class="right">{{ c.porcentaje }}%</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3" class="text-center">No hay datos de carrera.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>Resumen por Profesor</h2>
+    {% for p in prof_stats %}
+      <h3>{{ p.nombre }}</h3>
+      <p>
+        Clases dadas: {{ p.clases_dadas }} |
+        Estudiantes: {{ p.estudiantes }} |
+        % Asistencia: {{ p.porcentaje }}%
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Asignatura</th>
+            <th>Sección</th>
+            <th class="right">Manual</th>
+            <th class="right">Automático</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in p.detalle %}
+          <tr>
+            <td>{{ d.asignatura }}</td>
+            <td>{{ d.seccion }}</td>
+            <td class="right">{{ d.manual }}</td>
+            <td class="right">{{ d.automatico }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center">Sin registros.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <hr>
+    {% empty %}
+      <p>No hay datos de profesores.</p>
+    {% endfor %}
+  </div>
+
+  <div class="footer">
+    Generado el {{ now|date:"Y-m-d H:i" }}
+  </div>
+</body>
+</html>

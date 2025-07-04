@@ -1,0 +1,162 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Gestión de Profesores</h2>
+
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+
+  <div class="row">
+    <!-- FORMULARIO CREAR / EDITAR -->
+    <div class="col-md-5">
+      <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre</label>
+              {{ form.nombre }}
+              {% if form.nombre.errors %}
+                <div class="text-danger small">{{ form.nombre.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ form.apellido.id_for_label }}" class="form-label">Apellido</label>
+              {{ form.apellido }}
+              {% if form.apellido.errors %}
+                <div class="text-danger small">{{ form.apellido.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="rut-input" class="form-label">RUT</label>
+              {{ form.rut }}
+              {% if form.rut.errors %}
+                <div class="text-danger small">{{ form.rut.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ form.carrera.id_for_label }}" class="form-label">Carrera</label>
+              {{ form.carrera }}
+              {% if form.carrera.errors %}
+                <div class="text-danger small">{{ form.carrera.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+
+            {% if editar_id %}
+              <input type="hidden" name="editar" value="{{ editar_id }}">
+            {% endif %}
+
+            <button type="submit" class="btn btn-success w-100">
+              {% if editar_id %}Actualizar{% else %}Crear{% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA DE PROFESORES -->
+    <div class="col-md-7">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <table class="table table-bordered mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>RUT</th>
+                <th>Carrera</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for prof in profesores %}
+                <tr>
+                  <td>{{ prof.first_name }} {{ prof.last_name }}</td>
+                  <td>{{ prof.email }}</td>
+                  <td>{{ prof.rut }}</td>
+                  <td>{{ prof.carrera.nombre }}</td>
+                  <td class="text-center">
+                    <a href="?editar={{ prof.id }}" class="btn btn-sm btn-warning me-1">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-danger btn-delete"
+                      data-delete-url="{% url 'sedes:gestionar_profesores' %}"
+                      data-delete-id="{{ prof.id }}"
+                      data-delete-msg="¿Eliminar al profesor {{ prof.first_name }} {{ prof.last_name }}?">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center">No hay profesores registrados.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Modal global de confirmación de eliminación #}
+{% include "include/confirm_delete_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const modalEl = document.getElementById('confirmDeleteModal');
+  const modal   = new bootstrap.Modal(modalEl);
+  const form    = modalEl.querySelector('form');
+  const msg     = modalEl.querySelector('#confirmDeleteMessage');
+  const input   = modalEl.querySelector('#confirmDeleteInput');
+
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      form.action     = btn.dataset.deleteUrl;
+      input.value     = btn.dataset.deleteId;
+      msg.textContent = btn.dataset.deleteMsg;
+      modal.show();
+    });
+  });
+});
+</script>
+
+{# Mantengo tu script de formateo de RUT #}
+<script>
+function formatearRut(rut) {
+  rut = rut.replace(/^0+|[^0-9kK]+/g, '').toUpperCase().slice(0,9);
+  if (rut.length < 2) return rut;
+  const cuerpo = rut.slice(0,-1), dv = rut.slice(-1);
+  let cuerpoF=''; let cnt=0;
+  for (let i=cuerpo.length-1; i>=0; i--) {
+    cuerpoF = cuerpo[i] + cuerpoF;
+    cnt++;
+    if (cnt===3 && i!==0) { cuerpoF='.'+cuerpoF; cnt=0; }
+  }
+  return `${cuerpoF}-${dv}`;
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const rutInput = document.getElementById('rut-input');
+  if (!rutInput) return;
+  rutInput.addEventListener('input', () => {
+    const clean = rutInput.value.replace(/[^\dKk]/g,'').toUpperCase();
+    rutInput.value = formatearRut(clean);
+  });
+});
+</script>
+{% endblock %}

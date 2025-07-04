@@ -1,0 +1,125 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Gestión de Bloques Horarios</h2>
+
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+
+  <!-- FORMULARIO CREAR / EDITAR -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-4">
+            {{ form.nombre.label_tag }} 
+            {{ form.nombre }}
+            {% if form.nombre.errors %}
+              <div class="text-danger small">{{ form.nombre.errors|join:", " }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            {{ form.hora_inicio.label_tag }} 
+            {{ form.hora_inicio }}
+            {% if form.hora_inicio.errors %}
+              <div class="text-danger small">{{ form.hora_inicio.errors|join:", " }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            {{ form.hora_fin.label_tag }} 
+            {{ form.hora_fin }}
+            {% if form.hora_fin.errors %}
+              <div class="text-danger small">{{ form.hora_fin.errors|join:", " }}</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="mt-3">
+          <button type="submit" class="btn btn-primary">
+            {% if editar_id %}Actualizar{% else %}Crear{% endif %}
+          </button>
+          {% if editar_id %}
+            <a href="{% url 'clases:gestionar_bloques_horarios' %}" class="btn btn-secondary ms-2">
+              Cancelar
+            </a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TABLA DE BLOQUES -->
+  <div class="card">
+    <div class="card-body">
+      <h4>Bloques existentes</h4>
+      <div class="table-responsive">
+        <table class="table table-striped mt-3">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Inicio</th>
+              <th>Fin</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for bloque in bloques %}
+              <tr>
+                <td>{{ bloque.nombre }}</td>
+                <td>{{ bloque.hora_inicio|time:"g:i A" }}</td>
+                <td>{{ bloque.hora_fin|time:"g:i A" }}</td>
+                <td class="text-center">
+                  <a href="?editar={{ bloque.id }}"
+                     class="btn btn-sm btn-warning me-1">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-danger btn-delete"
+                    data-delete-url="{% url 'clases:gestionar_bloques_horarios' %}"
+                    data-delete-id="{{ bloque.id }}"
+                    data-delete-msg="¿Eliminar el bloque ‘{{ bloque.nombre }}’?">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="text-center">No hay bloques registrados.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Modal global de confirmación de eliminación #}
+{% include "include/confirm_delete_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toda la lógica del modal queda igual que en tu _base.html_
+document.addEventListener('DOMContentLoaded', () => {
+  const modalEl = document.getElementById('confirmDeleteModal');
+  const modal   = new bootstrap.Modal(modalEl);
+  const form    = modalEl.querySelector('form');
+  const msg     = modalEl.querySelector('#confirmDeleteMessage');
+  const input   = modalEl.querySelector('#confirmDeleteInput');
+
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      form.action     = btn.dataset.deleteUrl;
+      input.value     = btn.dataset.deleteId;
+      msg.textContent = btn.dataset.deleteMsg;
+      modal.show();
+    });
+  });
+});
+</script>
+{% endblock %}

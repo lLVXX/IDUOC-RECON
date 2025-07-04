@@ -1,0 +1,13 @@
+Django==5.2.3
+psycopg2-binary
+celery
+django-celery-results
+pgvector
+gunicorn
+requests
+xhtml2pdf
+reportlab
+django-cors-headers
+djangorestframework
+numpy
+pandas

@@ -1,0 +1,26 @@
+BEGIN;
+
+-- Paso 1: Eliminar relaciones en la tabla intermedia estudiante-asignatura-seccion
+DELETE FROM personas_estudianteasignaturaseccion
+WHERE estudiante_id IN (
+    SELECT id FROM core_customuser WHERE user_type = 'estudiante'
+);
+
+-- Paso 2: Eliminar todas las fotos (base y dinámicas) asociadas a los estudiantes
+DELETE FROM personas_estudiantefoto
+WHERE estudiante_id IN (
+    SELECT id FROM core_customuser WHERE user_type = 'estudiante'
+);
+
+-- Paso 3: Eliminar usuarios de tipo estudiante
+DELETE FROM core_customuser
+WHERE user_type = 'estudiante';
+
+COMMIT;
+
+--- Ejecuta : psql -U postgres -d SCOUT_DB -f reset_estudiantes.sql
+
+-- psql -U postgres -d SCOUT_DB
+
+-- \pset pager off
+DELETE FROM core_customuser WHERE id = 73;
