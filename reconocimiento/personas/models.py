@@ -55,7 +55,6 @@ class EstudianteFoto(models.Model):
 
     class Meta:
         ordering = ['-es_base', '-created_at']
-        ordering = ['-es_base', '-created_at']
         constraints = [
             # Solo UNA foto con es_base=True por estudiante
             models.UniqueConstraint(

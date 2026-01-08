@@ -18,41 +18,70 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-dev-only"
+)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-n#p!$))$#j8iy%h@y*&hpi7!r+r_&*uayy0k#^mygjf+lczk@9'
+DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost,127.0.0.1"
+).split(",")
 
 # URL del microservicio de ArcFace
+
 #LOCAL ARC_FACE_URL = "http://localhost:8001"
 #LOCAL ARC_FACE_WS  = "http://localhost:8001"
 
-
 # Microservicio ArcFace
-ARC_FACE_URL = os.getenv("ARC_FACE_URL", "http://arcface:8001").rstrip('/')
-ARC_FACE_WS  = os.getenv("ARC_FACE_WS",  "ws://arcface:8001/stream/")
+ARC_FACE_URL = os.getenv(
+    "ARC_FACE_URL",
+    "http://arcface:8001"
+).rstrip('/')
+
+ARC_FACE_WS = os.getenv(
+    "ARC_FACE_WS",
+    "ws://arcface:8001/stream/"
+)
+
 # Celery
 
 
 
 
-CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'
-CELERY_RESULT_BACKEND = 'django-db'  # Esto es correcto si estás usando django_celery_results
+CELERY_BROKER_URL = os.getenv(
+    "CELERY_BROKER_URL",
+    "amqp://guest:guest@rabbitmq:5672//"
+)
+
+CELERY_RESULT_BACKEND = os.getenv(
+    "CELERY_RESULT_BACKEND",
+    "django-db"
+)
+
 CELERY_TASK_ALWAYS_EAGER = False
+CELERY_RESULT_EXTENDED = True
 
 
 
 CELERY_RESULT_EXTENDED = True
 CELERY_CACHE_BACKEND = 'default'
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8001",
+    "http://localhost:8001",
+]
 
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 
 
 
@@ -124,12 +153,13 @@ WSGI_APPLICATION = 'reconocimiento.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('PG_DB', 'SCOUT_DB'),
-        'USER': os.getenv('PG_USER', 'postgres'),
-        'PASSWORD': os.getenv('PG_PASSWORD', '12345678'),
+        'NAME': os.getenv('PG_DB'),
+        'USER': os.getenv('PG_USER'),
+        'PASSWORD': os.getenv('PG_PASSWORD'),
         'HOST': os.getenv('PG_HOST', 'db'),
         'PORT': os.getenv('PG_PORT', '5432'),
     }
@@ -140,6 +170,8 @@ DATABASES = {
 
 
 
+
+MAX_FOTOS_DINAMICAS_POR_ESTUDIANTE = 3
 
 
 AUTH_USER_MODEL = 'core.CustomUser'
@@ -186,6 +218,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "core" / "static",
+]
 
 
 MEDIA_URL = '/media/'

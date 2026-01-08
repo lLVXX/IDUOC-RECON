@@ -1,76 +1,107 @@
-Reconocimiento Facial Académico
+# 🎓 Reconocimiento Facial Académico
 
-Reconocimiento Facial Académico es una plataforma basada en Django y FastAPI que ofrece un flujo completo de asistencia en tiempo real para entornos educativos. Integra procesamiento de video por WebSocket, generación y comparación de embeddings con ArcFace (ONNX), y un sistema de almacenamiento vectorial en PostgreSQL + pgvector, todo orquestado mediante Docker y Celery.
+**Reconocimiento Facial Académico** es una plataforma educativa basada en **Django + FastAPI** que implementa un flujo completo de **asistencia facial en tiempo real**, utilizando visión computacional, embeddings faciales y procesamiento asíncrono en una arquitectura moderna y desacoplada.
 
-Introducción
+---
 
-Este repositorio agrupa dos servicios contenedorizados:
+## 📌 Arquitectura General
 
-Aplicación Django que maneja autenticación multifacética, roles (admin_global, admin_zona, profesor, estudiante) y vistas de gestión.
+La plataforma se compone de dos servicios principales, totalmente contenedorizados:
 
-Microservicio FastAPI que expone endpoints para generar embeddings faciales, comparar vectores y servir streaming WebSocket.
+### 🧠 Django (Backend principal)
+- Autenticación y control de roles:
+  - `admin_global`
+  - `admin_zona`
+  - `profesor`
+  - `estudiante`
+- Gestión académica completa.
+- Interfaz web para asistencia facial en tiempo real.
+- Orquestación de tareas con **Celery**.
 
-Ambos interactúan con una base de datos PostgreSQL que utiliza pgvector para almacenar vectores de alta dimensión. Las tareas intensivas (generación de embeddings, política FIFO de imágenes dinámicas) se procesan asíncronamente mediante Celery y RabbitMQ.
+### ⚡ FastAPI (Microservicio ArcFace)
+- Generación de embeddings faciales con **InsightFace (ONNX)**.
+- Comparación vectorial usando **pgvector**.
+- Streaming de video en tiempo real vía **WebSocket**.
+- Recarga dinámica de embeddings.
 
-Tecnologías
+---
 
-La plataforma emplea las siguientes tecnologías clave:
+## 🧰 Tecnologías
 
-Python 3.10 como lenguaje principal.
+- Python 3.10  
+- Django 5.2.3  
+- FastAPI 0.95  
+- InsightFace (ONNX – buffalo_l)  
+- PostgreSQL ≥ 14 + pgvector  
+- Celery 5.5.3  
+- RabbitMQ 3.9  
+- Docker CE 24.x  
+- Docker Compose 3.9  
 
-Django 5.2.3 para la capa MVC y la interfaz administrativa.
+---
 
-FastAPI 0.95 para endpoints REST y WebSocket de reconocimiento.
+## 🚀 Despliegue Local (Docker)
 
-InsightFace (ONNX buffalo_l) para extracción de embeddings faciales.
+##  Hacer .env igual o similar a (raiz proyecto)
 
-ONNX Runtime para ejecución del modelo.
+```bash
 
-PostgreSQL ≥14 + pgvector para almacenamiento y consulta de vectores.
+# =========================
+# DJANGO
+# =========================
 
-Celery 5.5.3 y RabbitMQ 3.9 para procesar tareas en background (generación y recarga de embeddings, limpieza FIFO).
+DJANGO_SECRET_KEY= GENERAR PROPIA 
 
-Docker CE 24.x y Docker Compose 3.9 para contenerizar y orquestar servicios.
 
-Quick Start con Docker
+DJANGO_ALLOWED_HOSTS=*
 
-Sigue estos pasos para desplegar la plataforma localmente en menos de 5 minutos:
 
-Clona el repositorio y sitúate en la carpeta:
+DJANGO_SUPERUSER=admin
+DJANGO_SUPEREMAIL=admin@Valkyria.clS
+DJANGO_SUPERPASSWORD=cambiameporfavor
 
+
+DJANGO_DEBUG=1
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+
+
+# =========================
+# POSTGRES / PGVECTOR
+# =========================
+PG_DB=DB_SCOUT
+PG_USER=postgres
+PG_PASSWORD=12345678
+PG_HOST=db
+PG_PORT=5432
+
+
+# =========================
+# ARCFACE
+# =========================
+# Backend Django → servicio Docker
+ARC_FACE_URL=http://arcface:8001
+ARC_FACE_WS=ws://arcface:8001/stream/
+
+
+# =========================
+# CELERY / RABBITMQ
+# =========================
+CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+CELERY_RESULT_BACKEND=django-dbyyz
+
+
+```
+
+
+### 1️⃣ Clonar el repositorio
+
+```bash
 git clone https://github.com/lLVXX/IDUOC-RECON.git
 cd IDUOC-RECON
 
-Copia el archivo de variables de entorno y personalízalo:
+- generar .env
 
-cp .env.example .env
-# Edita .env según tu configuración de base de datos y servicios
+- deploy.bat
 
-Construye y levanta todos los contenedores:
-
-docker compose build --pull --no-cache
-docker compose up -d
-
-*Nota: Durante la construcción se instala automáticamente requirements.txt.
-
-Ejecuta migraciones y crea el superusuario:
-
-docker compose exec django python manage.py migrate
-docker compose exec django python manage.py createsuperuser
-
-Abre tu navegador y verifica que todo funcione:
-
-Aplicación web: http://localhost:8000
-
-Documentación FastAPI: http://localhost:8001/docs
-
-Panel RabbitMQ: http://localhost:15672 (guest/guest)
-
-Contribución
-
-Las contribuciones son bienvenidas. Para proponer cambios, crea un fork, abre una rama con tu feature o fix, y envía un pull request contra main.
-
-Licencia
-
-Este proyecto está licenciado bajo MIT. Para más detalles, consulta el archivo LICENSE.
+```
 
