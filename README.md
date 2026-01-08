@@ -42,6 +42,13 @@ La plataforma se compone de dos servicios principales, totalmente contenedorizad
 
 ## 🚀 Despliegue Local (Docker)
 
+
+```bash
+git clone https://github.com/lLVXX/IDUOC-RECON.git
+cd IDUOC-RECON
+
+```
+
 ##  Hacer .env igual o similar a (raiz proyecto)
 
 ```bash
@@ -88,20 +95,13 @@ ARC_FACE_WS=ws://arcface:8001/stream/
 # =========================
 CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
 CELERY_RESULT_BACKEND=django-dbyyz
-
-
 ```
 
 
-### 1️⃣ Clonar el repositorio
+###  Finalmente
 
 ```bash
-git clone https://github.com/lLVXX/IDUOC-RECON.git
-cd IDUOC-RECON
-
 - generar .env
-
 - deploy.bat
-
 ```
 
