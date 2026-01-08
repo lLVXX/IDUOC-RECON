@@ -1,0 +1,244 @@
+/* Set up the flex background */
+.flex-background {
+    background-image: url('../images/Portal_Backgrounf.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.content-container {
+    background-color: rgba(255, 255, 255, 0.85); /* semi-transparent white */
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 1200px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+/* For mobile responsiveness */
+@media (max-width: 768px) {
+    .content-container {
+        width: 95%;
+        padding: 1rem;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+/* Contenedor principal */
+.portal-container {
+  height: 100vh;
+  background: transparent;
+}
+
+/* Contenedor de la card */
+.portal-card-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 100vh;
+  padding: 3rem;
+}
+
+/* Card estática (sin hover) */
+.portal-card {
+  width: 100%;
+  max-width: 600px;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  background-color: white;
+  /* Se eliminó la transición y hover de la card */
+}
+
+/* Header */
+.portal-card-header {
+  background: #f8f9fa;
+  color: #212529;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  text-align: center;
+}
+
+.portal-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 2rem;
+}
+
+/* Cuerpo de la card */
+.portal-card-body {
+  padding: 3rem;
+}
+
+/* Formulario */
+.portal-form .form-group label {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.portal-form input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s;
+}
+
+.portal-form input:focus {
+  border-color: #6c757d;
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.15);
+}
+
+/* Botón con animación hover */
+.portal-btn {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.2rem;
+  background-color: #6c757d;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.portal-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Footer */
+.portal-card-footer {
+  background: #f8f9fa;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1.5rem 2rem;
+}
+
+/* Alertas */
+.portal-alert {
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .portal-card-container {
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  
+  .portal-card {
+    margin: 2rem auto;
+    max-width: 100%;
+  }
+  
+  .portal-card-body {
+    padding: 2rem;
+  }
+}
+
+
+
+/* --------- Dashboard Admin Zona --------- */
+
+/* Compact graph card */
+.dashboard-graph-card {
+    min-height: 210px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.graph-card-body {
+    padding: 1.2rem 0.5rem 0.7rem 0.5rem !important;
+}
+
+.porcentaje-label strong {
+    font-size: 1.3rem;
+}
+
+.porcentaje-label {
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+}
+
+.dashboard-carrera-card,
+.dashboard-asignatura-card {
+    min-height: 210px;
+}
+
+.dashboard-carrera-card .card-body,
+.dashboard-asignatura-card .card-body {
+    padding: 1rem 0.7rem 0.5rem 0.7rem !important;
+}
+
+@media (max-width: 992px) {
+    .dashboard-graph-card,
+    .dashboard-carrera-card {
+        min-height: 180px;
+    }
+    .graph-card-body {
+        padding: 0.8rem 0.2rem 0.5rem 0.2rem !important;
+    }
+    .dashboard-carrera-card .card-body,
+    .dashboard-asignatura-card .card-body {
+        padding: 0.6rem 0.2rem 0.4rem 0.2rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-graph-card,
+    .dashboard-carrera-card,
+    .dashboard-asignatura-card {
+        min-height: unset;
+    }
+    .graph-card-body,
+    .dashboard-carrera-card .card-body,
+    .dashboard-asignatura-card .card-body {
+        padding: 0.4rem 0.1rem !important;
+    }
+}
+
+
+
+
+
+
+/* --------- Gestion estudiantes --------- */
+
+
+.table-fixed {
+  table-layout: fixed;
+  width: 100%;
+}
+.table-fixed th, .table-fixed td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.table-fixed tbody tr {
+  height: 60px;
+}

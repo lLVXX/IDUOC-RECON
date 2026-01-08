@@ -1,6 +1,3 @@
-# Python
-__pycache__/
-*.pyc
 
 # Entorno y configuración
 .env
@@ -8,15 +5,27 @@ venv/
 .venv/
 reconocimiento_venv/
 
-# Archivos de medios
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django
 media/
 staticfiles/
-static/
+*.log
 
-# IDEs / editores
-.vscode/
-.idea/
+# Env
+.env
 
 # Docker
-docker-compose.override.yml
-*.log
+postgres_data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

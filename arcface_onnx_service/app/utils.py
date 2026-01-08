@@ -79,12 +79,25 @@ def comparar_embeddings(query_embedding, embeddings_dict):
                 best_id = est_id
     return best_id, best_score
 
-# -----------------------------------------
-# Guardar foto + embedding + aplicar FIFO
-# -----------------------------------------
-def guardar_foto_y_embedding_fifo(estudiante_id, img_bytes, is_base, pg_config, embedding):
+def guardar_foto_y_embedding_fifo(estudiante_id, image, embedding, pg_config, is_base=False):
+    """
+    Guarda imagen + embedding en PostgreSQL y disco, aplicando FIFO para dinámicas (>3).
+    """
     try:
-        conn = conectar_db(pg_config)
+        # Obtener ruta desde ENV (ya dentro del contenedor)
+        IMAGE_SAVE_PATH = os.getenv("IMAGE_SAVE_PATH", "/app/media/estudiantes/fotos_extra")
+        os.makedirs(IMAGE_SAVE_PATH, exist_ok=True)
+
+        # Nombre de archivo con timestamp
+        filename = f"{estudiante_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpeg"
+        filepath = os.path.join(IMAGE_SAVE_PATH, filename)
+
+        # Guardar imagen en disco
+        image.save(filepath, "JPEG")
+        print(f"🖼️ Imagen dinámica guardada: {filepath}")
+
+        # Conectar a PostgreSQL
+        conn = psycopg2.connect(**pg_config)
         cur = conn.cursor()
 
         # Insertar nueva imagen
@@ -92,17 +105,17 @@ def guardar_foto_y_embedding_fifo(estudiante_id, img_bytes, is_base, pg_config, 
             INSERT INTO personas_estudiantefoto (estudiante_id, imagen, es_base, created_at)
             VALUES (%s, %s, %s, %s)
             RETURNING id
-        """, (estudiante_id, psycopg2.Binary(img_bytes), is_base, datetime.now()))
+        """, (estudiante_id, f"estudiantes/fotos_extra/{filename}", is_base, datetime.now()))
         foto_id = cur.fetchone()[0]
 
-        # Insertar nuevo embedding
+        # Insertar embedding
         cur.execute("""
             UPDATE personas_estudiantefoto
             SET embedding = %s
             WHERE id = %s
-        """, (embedding, foto_id))
+        """, (embedding.astype('float32').tolist(), foto_id))
 
-        # FIFO: borrar más antiguas si hay > 3 dinámicas (no base)
+        # FIFO: borrar más antiguas si hay >3 dinámicas (no base)
         cur.execute("""
             SELECT id FROM personas_estudiantefoto
             WHERE estudiante_id = %s AND es_base = FALSE
@@ -121,5 +134,7 @@ def guardar_foto_y_embedding_fifo(estudiante_id, img_bytes, is_base, pg_config, 
         conn.commit()
         cur.close()
         conn.close()
+        print("✅ Nueva dinámica insertada.")
+
     except Exception as e:
         print(f"❌ Error al guardar imagen y aplicar FIFO: {e}")

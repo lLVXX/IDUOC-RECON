@@ -107,7 +107,7 @@ def startup_event():
 # ----------------------------
 def guardar_imagen_dinamica(estudiante_id: int, image: Image.Image, embedding: np.ndarray):
     # ✅ Ruta real al media/ de Django
-    IMAGE_SAVE_PATH = "C:/Proyectos/reconocimiento/media/estudiantes/fotos_extra"
+    IMAGE_SAVE_PATH = os.getenv("IMAGE_SAVE_PATH", "/app/media/estudiantes/fotos_extra")
     os.makedirs(IMAGE_SAVE_PATH, exist_ok=True)
 
     # 📝 Nombre de archivo con timestamp
